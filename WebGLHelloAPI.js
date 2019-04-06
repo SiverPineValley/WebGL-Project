@@ -1,10 +1,13 @@
 var gl;
+var shaderProgram;
 
 function testGLError(functionLastCalled) {
     /*
 		gl.getError returns the last error that occurred using WebGL, not necessarily the status of the last called function. The user
 		has to check after every single WebGL call or at least once every frame. Usually this would be for debugging only, but for this
-		example is is enabled always.
+        example is is enabled always.
+        파라미터 : 가장 최근에 call된 gl함수를 파라미터로 받고, 이를 test하여 에러가 발생하는지 확인한다.
+        에러가 발생하면, 에러 메시지를 출력하고 false를 리턴한다. 정상적이면 true를 리턴한다.
 	*/
 
     var lastError = gl.getError();
@@ -17,15 +20,20 @@ function testGLError(functionLastCalled) {
     return true;
 }
 
+// GL 초기화
 function initialiseGL(canvas) {
+    // 아래 과정중 error가 있으면 아무 일도 하지 않는다.
     try {
         // Try to grab the standard context. If it fails, fallback to experimental
+        // webgl혹은 experimental-webgl(베타버전)을 쓸거라는 선언
         gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
-        gl.viewport(0, 0, canvas.width, canvas.height);
-    }
-    catch (e) {
-    }
 
+        // document의 canvas(실제로 그릴 그림)의 x.start, y.start값과, 폭과 높이, 시작점을 받아온다.
+        gl.viewport(0, 0, canvas.width, canvas.height);
+    } catch (e) {}
+
+    // 에러가 발생하면, gl이 null일 것이므로, 경고 메시지를 보여준다. 이후 false 리턴
+    // 정상적이면 true 리턴.
     if (!gl) {
         alert("Unable to initialise WebGL. Your browser may not support it");
         return false;
@@ -36,6 +44,7 @@ function initialiseGL(canvas) {
 
 var shaderProgram;
 
+// Vertex Buffer 초기화
 function initialiseBuffer() {
     /*	Concept: Vertices
 		When rendering a polygon or model to screen, WebGL has to be told where to draw the object, and more fundamentally what shape 
@@ -51,28 +60,34 @@ function initialiseBuffer() {
 		a buffer and giving it some data we can tell the GPU how to render a triangle.
 	*/
 
-    var vertexData = [
-        -0.4, -0.4, 0.0, // Bottom left
-         0.4, -0.4, 0.0, // Bottom right
-         0.0, 0.4, 0.0  // Top middle
+    // 삼각형의 vertex를 의미한다. x, y, z (정규화된 좌표계)
+    // x와 y는 -1부터 1까지의 값을 가진다.
+    // y는 화면 위로 갈때 1, 화면 아래로 갈때 -1
+    var vertexData = [-0.4, -0.4, 0.0, // Bottom left
+        0.4, -0.4, 0.0, // Bottom right
+        0.0, 0.4, 0.0 // Top middle
     ];
 
     // Generate a buffer object
+    // buffer object 생성
     gl.vertexBuffer = gl.createBuffer();
 
     // Bind buffer as a vertex buffer so we can fill it with data
+    // 생성된 buffer를 vertex buffer로 bind하고, data를 채운다.
     gl.bindBuffer(gl.ARRAY_BUFFER, gl.vertexBuffer);
 
     /*
         Set the buffer's size, data and usage
         Note the last argument - gl.STATIC_DRAW. This tells the driver that we intend to read from the buffer on the GPU, and don't intend
         to modify the data until we've done with it.
+        버퍼의 크기를 조정한다. gl.STATIC_DRAW는 GPU의 버퍼에서 읽고, 수정하지 않을 것이라는 것을 알려준다.
     */
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexData), gl.STATIC_DRAW);
 
     return testGLError("initialiseBuffers");
 }
 
+// 쉐이더 초기화
 function initialiseShaders() {
     /*	Concept: Shaders
         WebGL uses what are known as shaders to determine how to draw objects on the screen. Instead of the fixed function
@@ -93,6 +108,7 @@ function initialiseShaders() {
         performing blending, where multiple fragments can contribute to the final pixel colour.
     */
 
+    // R, G, B, A(불투명도)
     var fragmentShaderSource = '\
 			void main(void) \
 			{ \
@@ -100,6 +116,7 @@ function initialiseShaders() {
 			}';
 
     // Create the fragment shader object
+    // fragment shader object 생성.
     gl.fragShader = gl.createShader(gl.FRAGMENT_SHADER);
 
     // Load the source code into it
@@ -245,28 +262,36 @@ function renderScene() {
 }
 
 function main() {
+    // document는 이 js 파일을 호출한 html 문서를 뜻한다.
+    // helloapicanvas는 html에서 만든 canvas(2d 비트맵) element의 id이다.
     var canvas = document.getElementById("helloapicanvas");
 
+    // GL 초기화
     if (!initialiseGL(canvas)) {
         return;
     }
 
+    // 버퍼 초기화
     if (!initialiseBuffer()) {
         return;
     }
 
+    // 쉐이더 초기화
     if (!initialiseShaders()) {
         return;
     }
 
     // Render loop
-    requestAnimFrame = (function () {
+    // 같은 그림을 60장씩 계속 그리고 있는 상태이다.
+    // 정해진 단위마다 renderScene을 그리고, showpage를 한다.
+    requestAnimFrame = (function() {
         return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame ||
-			function (callback) {
-			    window.setTimeout(callback, 1000, 60);
-			};
+            function(callback) {
+                window.setTimeout(callback, 1000, 60);
+            };
     })();
 
+    // Render loop에서 계속 call하는 함수. renderLoop에서는 renderScene을 call한다.
     (function renderLoop() {
         if (renderScene()) {
             // Everything was successful, request that we redraw our scene again in the future
