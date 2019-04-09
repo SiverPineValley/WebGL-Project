@@ -1,6 +1,7 @@
 var gl;
 var shaderProgram;
 var background = 0.0;
+var rotation = 0.0;
 var re = 0;
 
 function testGLError(functionLastCalled) {
@@ -65,9 +66,9 @@ function initialiseBuffer() {
     // 삼각형의 vertex를 의미한다. x, y, z (정규화된 좌표계)
     // x와 y는 -1부터 1까지의 값을 가진다.
     // y는 화면 위로 갈때 1, 화면 아래로 갈때 -1
-    var vertexData = [-0.4, -0.4, 0.0, // Bottom left
-        0.4, -0.4, 0.0, // Bottom right
-        0.0, 1.0, 0.0 // Top middle
+    var vertexData = [-0.4, -0.4, 0.0, 1.0, 0.0, 0.0, 1.0, // Bottom left
+        0.4, -0.4, 0.0, 0.0, 1.0, 0.0, 1.0, // Bottom right
+        0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0 // Top middle
     ];
 
     // Generate a buffer object
@@ -111,10 +112,12 @@ function initialiseShaders() {
     */
 
     // R, G, B, A(불투명도)
+    // // vec4(1.0, 1.0, 0.66, 1.0);
     var fragmentShaderSource = '\
+            varying highp vec4 color; \
 			void main(void) \
 			{ \
-				gl_FragColor = vec4(1.0, 1.0, 0.66, 1.0); \
+				gl_FragColor = color; \
 			}';
 
     // Create the fragment shader object
@@ -142,12 +145,19 @@ function initialiseShaders() {
     */
 
     // Vertex shader code
+    // 벡터가 4개(vec4) javascript코드에서 Transformation Matrix를 제외한 나머지는 알아서 채운다. 마지막은 1.
+    // 매트릭스(renderScene에 있음)도 4X4로 받아온다. (vector가 4차원이기 때문) 
+    // color.r = gl_Position.x;
     var vertexShaderSource = '\
-			attribute highp vec4 myVertex; \
-			uniform mediump mat4 transformationMatrix; \
+            attribute highp vec4 myVertex; \
+            attribute highp vec4 myColor; \
+            uniform mediump mat4 transformationMatrix; \
+            varying highp vec4 color; \
 			void main(void)  \
 			{ \
-				gl_Position = transformationMatrix * myVertex; \
+                gl_Position = transformationMatrix * myVertex; \
+                color = myColor; \
+                 \
 			}';
 
     // Create the vertex shader object
@@ -230,6 +240,13 @@ function renderScene() {
         0.0, 0.0, 0.0, 1.0
     ];
 
+    // 회전
+    transformationMatrix[0] = Math.cos(rotation);
+    transformationMatrix[5] = Math.cos(rotation);
+    transformationMatrix[1] = Math.sin(rotation);
+    transformationMatrix[4] = -Math.sin(rotation);
+    rotation += 0.005;
+
     // Pass the identity transformation matrix to the shader using its location
     gl.uniformMatrix4fv(matrixLocation, gl.FALSE, transformationMatrix);
 
@@ -237,11 +254,13 @@ function renderScene() {
         return false;
     }
 
-    // Enable the user-defined vertex array
-    gl.enableVertexAttribArray(0);
-
+    // 유저가 지정한 vertex array를 enable해준다.
     // Set the vertex data to this attribute index, with the number of floats in each position
-    gl.vertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, 0, 0);
+    // 총 2개의 attribute를 가지며, 각 attribute는 28바이트 떨어져있다. 그중 12바이트 떨어져있다.
+    gl.enableVertexAttribArray(0);
+    gl.vertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, 28, 0);
+    gl.enableVertexAttribArray(1);
+    gl.vertexAttribPointer(1, 4, gl.FLOAT, gl.FALSE, 28, 12);
 
     if (!testGLError("gl.vertexAttribPointer")) {
         return false;
@@ -257,6 +276,7 @@ function renderScene() {
         Others include versions of the above that allow the user to draw the same ovhect multiple times with slightly different data, and
         a version of gl.drawElements which allows a user to restrict the actuial indices accessed.
     */
+    // postscript의 fill같은 느낌
     gl.drawArrays(gl.TRIANGLES, 0, 3);
 
     if (!testGLError("gl.drawArrays")) {
@@ -304,8 +324,8 @@ function main() {
         if (background >= 1.0) re = 1;
         else if (background <= 0.0) re = 0;
 
-        if (re == 0) background += 0.01;
-        else background -= 0.01;
+        if (re == 0) background += 0.005;
+        else background -= 0.005;
         if (renderScene()) {
             // Everything was successful, request that we redraw our scene again in the future
             requestAnimFrame(renderLoop);

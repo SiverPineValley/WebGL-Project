@@ -65,7 +65,7 @@ function initialiseBuffer() {
     // y는 화면 위로 갈때 1, 화면 아래로 갈때 -1
     var vertexData = [-0.4, -0.4, 0.0, // Bottom left
         0.4, -0.4, 0.0, // Bottom right
-        0.0, 0.4, 0.0 // Top middle
+        0.0, 1.0, 0.0 // Top middle
     ];
 
     // Generate a buffer object
@@ -140,6 +140,8 @@ function initialiseShaders() {
     */
 
     // Vertex shader code
+    // 벡터가 4개(vec4) javascript코드에서 Transformation Matrix를 제외한 나머지는 알아서 채운다. 마지막은 1.
+    // 매트릭스(renderScene에 있음)도 4X4로 받아온다. (vector가 4차원이기 때문) 
     var vertexShaderSource = '\
 			attribute highp vec4 myVertex; \
 			uniform mediump mat4 transformationMatrix; \
@@ -194,6 +196,7 @@ function initialiseShaders() {
     return testGLError("initialiseShaders");
 }
 
+// 화면에 그리는 명령
 function renderScene() {
     /*
         Set the clear colour
@@ -204,6 +207,7 @@ function renderScene() {
         gl.clear with the colour bit will clear the framebuffer to this vlaue.
         The functions gl.clearDepth and gl.clearStencil allow an application to do the same with depth and stencil values respectively.
     */
+    // 배경색을 지우고 바꿔라.
     gl.clearColor(0.6, 0.8, 1.0, 1.0);
 
     /*
@@ -212,12 +216,15 @@ function renderScene() {
         gl.DEPTH_BUFFER_BIT or gl.STENCIL_BUFFER_BIT, respectively.
     */
 
+    // clear를 안하면 그려지지 않는다.
     gl.clear(gl.COLOR_BUFFER_BIT);
 
     // Get the location of the transformation matrix in the shader using its name
+    // 쉐이더 내의 변형 매트릭스 이름을 이용하여, 위치를 받아온다.
     var matrixLocation = gl.getUniformLocation(gl.programObject, "transformationMatrix");
 
     // Matrix used to specify the orientation of the triangle on screen
+    // Transformation Matrix. 항등행렬이면, 위치 번형이 없다.
     var transformationMatrix = [
         1.0, 0.0, 0.0, 0.0,
         0.0, 1.0, 0.0, 0.0,
@@ -281,6 +288,9 @@ function main() {
         return;
     }
 
+    // scene을 그려라. Frame을 초당 60번 그려라
+    // renderScene();
+    // window.requestAnimationFrame(60);
     // Render loop
     // 같은 그림을 60장씩 계속 그리고 있는 상태이다.
     // 정해진 단위마다 renderScene을 그리고, showpage를 한다.
