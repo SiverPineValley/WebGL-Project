@@ -1,0 +1,331 @@
+var gl;
+var shaderProgram;
+var rot_z = 0.0;
+
+function testGLError(functionLastCalled) {
+    /*
+		gl.getError returns the last error that occurred using WebGL, not necessarily the status of the last called function. The user
+		has to check after every single WebGL call or at least once every frame. Usually this would be for debugging only, but for this
+        example is is enabled always.
+        파라미터 : 가장 최근에 call된 gl함수를 파라미터로 받고, 이를 test하여 에러가 발생하는지 확인한다.
+        에러가 발생하면, 에러 메시지를 출력하고 false를 리턴한다. 정상적이면 true를 리턴한다.
+	*/
+
+    var lastError = gl.getError();
+
+    if (lastError != gl.NO_ERROR) {
+        alert(functionLastCalled + " failed (" + lastError + ")");
+        return false;
+    }
+
+    return true;
+}
+
+// GL 초기화
+function initialiseGL(canvas) {
+    // 아래 과정중 error가 있으면 아무 일도 하지 않는다.
+    try {
+        // Try to grab the standard context. If it fails, fallback to experimental
+        // webgl혹은 experimental-webgl(베타버전)을 쓸거라는 선언
+        gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+
+        // document의 canvas(실제로 그릴 그림)의 x.start, y.start값과, 폭과 높이, 시작점을 받아온다.
+        gl.viewport(0, 0, canvas.width, canvas.height);
+    } catch (e) {}
+
+    // 에러가 발생하면, gl이 null일 것이므로, 경고 메시지를 보여준다. 이후 false 리턴
+    // 정상적이면 true 리턴.
+    if (!gl) {
+        alert("Unable to initialise WebGL. Your browser may not support it");
+        return false;
+    }
+
+    return true;
+}
+
+var shaderProgram;
+
+// Vertex Buffer 초기화
+function initialiseBuffer() {
+    /*	Concept: Vertices
+		When rendering a polygon or model to screen, WebGL has to be told where to draw the object, and more fundamentally what shape 
+		it is. The data used to do this is referred to as vertices, points in 3D space which are usually collected into groups of three 
+		to render as triangles. Fundamentally, any advanced 3D shape in WebGL is constructed from a series of these vertices - each 
+		vertex representing one corner of a polygon.
+	*/
+    /*	Concept: Buffer Objects
+		To operate on any data, WebGL first needs to be able to access it. The GPU maintains a separate pool of memory it uses independent
+		of the CPU. Whilst on many embedded systems these are in the same physical memory, the distinction exists so that they can use and
+		allocate memory without having to worry about synchronising with any other processors in the device.
+		To this end, data needs to be uploaded into buffers, which are essentially a reserved bit of memory for the GPU to use. By creating
+		a buffer and giving it some data we can tell the GPU how to render a triangle.
+	*/
+
+    // 삼각형의 vertex를 의미한다. x, y, z (정규화된 좌표계)
+    // x와 y는 -1부터 1까지의 값을 가진다.
+    // y는 화면 위로 갈때 1, 화면 아래로 갈때 -1
+    var vertexData = [-0.5, -0.6, -0.5, 1.0, 0.0, 0.0, 1.0, // Front Face Tri 1
+        0.5, 0.6, -0.5, 1.0, 0.0, 0.0, 1.0, // Front Face Tri 1
+        -0.5, 0.6, -0.5, 1.0, 0.0, 0.0, 1.0, // Front Face Tri 1
+        -0.5, -0.6, -0.5, 1.0, 0.0, 0.0, 1.0, // Front Face Tri 2
+        0.5, -0.6, -0.5, 1.0, 0.0, 0.0, 1.0, // Front Face Tri 2
+        0.5, 0.6, -0.5, 1.0, 0.0, 0.0, 1.0, // Front Face Tri 2
+
+        -0.5, 0.6, 0.5, 0.0, 0.0, 1.0, 1.0, // Back Face Tri 1
+        0.5, 0.6, 0.5, 0.0, 0.0, 1.0, 1.0, // Back Face Tri 1
+        -0.5, -0.6, 0.5, 0.0, 0.0, 1.0, 1.0, // Back Face Tri 1
+        0.5, 0.6, 0.5, 0.0, 0.0, 1.0, 1.0, // Back Face Tri 2
+        0.5, -0.6, 0.5, 0.0, 0.0, 1.0, 1.0, // Back Face Tri 2
+        -0.5, -0.6, 0.5, 0.0, 0.0, 1.0, 1.0, // Back Face Tri 2
+    ];
+
+    // Generate a buffer object
+    // buffer object 생성
+    gl.vertexBuffer = gl.createBuffer();
+
+    // Bind buffer as a vertex buffer so we can fill it with data
+    // 생성된 buffer를 vertex buffer로 bind하고, data를 채운다.
+    gl.bindBuffer(gl.ARRAY_BUFFER, gl.vertexBuffer);
+
+    /*
+        Set the buffer's size, data and usage
+        Note the last argument - gl.STATIC_DRAW. This tells the driver that we intend to read from the buffer on the GPU, and don't intend
+        to modify the data until we've done with it.
+        버퍼의 크기를 조정한다. gl.STATIC_DRAW는 GPU의 버퍼에서 읽고, 수정하지 않을 것이라는 것을 알려준다.
+    */
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexData), gl.STATIC_DRAW);
+
+    return testGLError("initialiseBuffers");
+}
+
+// 쉐이더 초기화
+function initialiseShaders() {
+    /*	Concept: Shaders
+        WebGL uses what are known as shaders to determine how to draw objects on the screen. Instead of the fixed function
+        pipeline in early OpenGL or OpenGL ES 1.x, users can now programmatically define how vertices are transformed on screen, what
+        data is used where, and how each pixel on the screen is coloured.
+        These shaders are written in GL Shading Language ES: http://www.khronos.org/registry/gles/specs/2.0/GLSL_ES_Specification_1.0.17.pdf
+        which is usually abbreviated to simply "GLSL ES".
+        Each shader is compiled on-device and then linked into a shader program, which combines a vertex and fragment shader into a form 
+        that the OpenGL ES implementation can execute.
+    */
+
+    /*	Concept: Fragment Shaders
+        In a final buffer of image data, each individual point is referred to as a pixel. Fragment shaders are the part of the pipeline
+        which determine how these final pixels are coloured when drawn to the framebuffer. When data is passed through here, the positions
+        of these pixels is already set, all that's left to do is set the final colour based on any defined inputs.
+        The reason these are called "fragment" shaders instead of "pixel" shaders is due to a small technical difference between the two
+        concepts. When you colour a fragment, it may not be the final colour which ends up on screen. This is particularly true when 
+        performing blending, where multiple fragments can contribute to the final pixel colour.
+    */
+
+    // R, G, B, A(불투명도)
+    // // vec4(1.0, 1.0, 0.66, 1.0);
+    var fragmentShaderSource = '\
+            varying highp vec4 color; \
+			void main(void) \
+			{ \
+				gl_FragColor = color; \
+			}';
+
+    // Create the fragment shader object
+    // fragment shader object 생성.
+    gl.fragShader = gl.createShader(gl.FRAGMENT_SHADER);
+
+    // Load the source code into it
+    gl.shaderSource(gl.fragShader, fragmentShaderSource);
+
+    // Compile the source code
+    gl.compileShader(gl.fragShader);
+
+    /*	Concept: Vertex Shaders
+        Vertex shaders primarily exist to allow a developer to express how to orient vertices in 3D space, through transformations like 
+        Scaling, Translation or Rotation. Using the same basic layout and structure as a fragment shader, these take in vertex data and 
+        output a fully transformed set of positions. Other inputs are also able to be used such as normals or texture coordinates, and can 
+        also be transformed and output alongside the position data.
+    */
+
+    // Vertex shader code
+    // 벡터가 4개(vec4) javascript코드에서 Transformation Matrix를 제외한 나머지는 알아서 채운다. 마지막은 1.
+    // 매트릭스(renderScene에 있음)도 4X4로 받아온다. (vector가 4차원이기 때문) 
+    // color.r = gl_Position.x;
+    var vertexShaderSource = '\
+            attribute highp vec4 myVertex; \
+            attribute highp vec4 myColor; \
+            uniform mediump mat4 transformationMatrix; \
+            varying highp vec4 color; \
+			void main(void)  \
+			{ \
+                gl_Position = transformationMatrix * myVertex; \
+                color = myColor; \
+                 \
+			}';
+
+    // Create the vertex shader object
+    gl.vertexShader = gl.createShader(gl.VERTEX_SHADER);
+
+    // Load the source code into it
+    gl.shaderSource(gl.vertexShader, vertexShaderSource);
+
+    // Compile the source code
+    gl.compileShader(gl.vertexShader);
+
+    // Check if compilation succeeded
+    if (!gl.getShaderParameter(gl.vertexShader, gl.COMPILE_STATUS)) {
+        // It didn't. Display the info log as to why
+        alert("Failed to compile the vertex shader.\n" + gl.getShaderInfoLog(gl.vertexShader));
+        return false;
+    }
+
+    // Create the shader program
+    gl.programObject = gl.createProgram();
+
+    // Attach the fragment and vertex shaders to it
+    gl.attachShader(gl.programObject, gl.fragShader);
+    gl.attachShader(gl.programObject, gl.vertexShader);
+
+    // Bind the custom vertex attribute "myVertex" to location 0
+    gl.bindAttribLocation(gl.programObject, 0, "myVertex");
+
+    // Link the program
+    gl.linkProgram(gl.programObject);
+
+    // Check if linking succeeded in a similar way we checked for compilation errors
+    if (!gl.getProgramParameter(gl.programObject, gl.LINK_STATUS)) {
+        alert("Failed to link the program.\n" + gl.getProgramInfoLog(gl.programObject));
+        return false;
+    }
+
+    /*	Use the Program
+        Calling gl.useProgram tells WebGL that the application intends to use this program for rendering. Now that it's installed into
+        the current state, any further gl.draw* calls will use the shaders contained within it to process scene data. Only one program can
+        be active at once, so in a multi-program application this function would be called in the render loop. Since this application only
+        uses one program it can be installed in the current state and left there.
+    */
+    gl.useProgram(gl.programObject);
+
+    return testGLError("initialiseShaders");
+}
+
+// 화면에 그리는 명령
+function renderScene() {
+    /*
+        Set the clear colour
+        At the start of a frame, generally you clear the image to tell WebGL that you're done with whatever was there before and want to
+        draw a new frame. In order to do that gowever, WebGL needs to know what colour to set in the image's place. gl.clearColor
+        sets this value as 4 floating point values between 0.0 and 1.0, as the Red, Green, Blue and Alpha channels. Each value represents
+        the intensity of the particular channel, with all 0.0 being transparent black, and all 1.0 being opaque white. Subsequent calls to
+        gl.clear with the colour bit will clear the framebuffer to this vlaue.
+        The functions gl.clearDepth and gl.clearStencil allow an application to do the same with depth and stencil values respectively.
+    */
+    // 배경색을 지우고 바꿔라.
+    // gl.clearColor(0.6, 0.8, 1.0, 1.0);
+    gl.clearColor(0.2, 0.2, 0.2, 0.1);
+
+    /*
+        Clear the colour buffer
+        gl.clear is used here with the colour buffer to clear the colour. It can also be used to clear the depth or stencil buffer using
+        gl.DEPTH_BUFFER_BIT or gl.STENCIL_BUFFER_BIT, respectively.
+    */
+
+    gl.clear(gl.COLOR_BUFFER_BIT);
+
+    // Get the location of the transformation matrix in the shader using its name
+    var matrixLocation = gl.getUniformLocation(gl.programObject, "transformationMatrix");
+
+    // Matrix used to specify the orientation of the triangle on screen
+    var transformationMatrix = [
+        1.0, 0.0, 0.0, 0.0,
+        0.0, 1.0, 0.0, 0.0,
+        0.0, 0.0, 1.0, 0.0,
+        0.0, 0.0, 0.0, 1.0
+    ];
+
+    // 회전
+    rot_z += 0.01;
+    transformationMatrix[0] = Math.cos(rot_z);
+    transformationMatrix[5] = Math.cos(rot_z);
+    transformationMatrix[10] = Math.sin(rot_z);
+    transformationMatrix[6] = -Math.sin(rot_z);
+
+    // Pass the identity transformation matrix to the shader using its location
+    gl.uniformMatrix4fv(matrixLocation, gl.FALSE, transformationMatrix);
+
+    if (!testGLError("gl.uniformMatrix4fv")) {
+        return false;
+    }
+
+    // 유저가 지정한 vertex array를 enable해준다.
+    // Set the vertex data to this attribute index, with the number of floats in each position
+    // 총 2개의 attribute를 가지며, 각 attribute는 28바이트 떨어져있다. 그중 12바이트 떨어져있다.
+    // 몇 번째의 attribute인지, attribute 개수, 플로팅포인트(4바이트), 28바이트 점프해야 다음 버텍스
+    gl.enableVertexAttribArray(0);
+    gl.vertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, 28, 0);
+    gl.enableVertexAttribArray(1);
+    gl.vertexAttribPointer(1, 4, gl.FLOAT, gl.FALSE, 28, 12);
+
+    if (!testGLError("gl.vertexAttribPointer")) {
+        return false;
+    }
+
+    /*
+        Draw the triangle
+        gl.drawArrays is a draw call, and executes the shader program using the vertices and other state set by the user. Draw calls are the
+        functions which tell WebGL when to actually draw something to the framebuffer gived the current state.
+        gl.drawArrays causes the vertices to be submitted sequentially from the position given by the "first" argument until it has processed
+        "count" vertices. Other draw calls exist, notably gl.drawElements which also accepts index data to allow the user to specify that 
+        some vertices are accessed multiple times, without copying the vertex multiple times.
+        Others include versions of the above that allow the user to draw the same ovhect multiple times with slightly different data, and
+        a version of gl.drawElements which allows a user to restrict the actuial indices accessed.
+    */
+    // postscript의 fill같은 느낌. 모양, starting point, 3의 배수의 개수
+    gl.drawArrays(gl.TRIANGLES, 0, 12);
+
+    if (!testGLError("gl.drawArrays")) {
+        return false;
+    }
+
+    return true;
+}
+
+function main() {
+    // document는 이 js 파일을 호출한 html 문서를 뜻한다.
+    // helloapicanvas는 html에서 만든 canvas(2d 비트맵) element의 id이다.
+    var canvas = document.getElementById("helloapicanvas");
+
+    // GL 초기화
+    if (!initialiseGL(canvas)) {
+        return;
+    }
+
+    // 버퍼 초기화
+    if (!initialiseBuffer()) {
+        return;
+    }
+
+    // 쉐이더 초기화
+    if (!initialiseShaders()) {
+        return;
+    }
+
+    // scene을 그려라. Frame을 초당 60번 그려라
+    // renderScene();
+    // window.requestAnimationFrame(60);
+    // Render loop
+    // 같은 그림을 60장씩 계속 그리고 있는 상태이다.
+    // 정해진 단위마다 renderScene을 그리고, showpage를 한다.
+    requestAnimFrame = (function() {
+        return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame ||
+            function(callback) {
+                window.setTimeout(callback, 1000, 60);
+            };
+    })();
+
+    // Render loop에서 계속 call하는 함수. renderLoop에서는 renderScene을 call한다.
+    (function renderLoop() {
+        if (renderScene()) {
+            // Everything was successful, request that we redraw our scene again in the future
+            requestAnimFrame(renderLoop);
+        }
+    })();
+}
