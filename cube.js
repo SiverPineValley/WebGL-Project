@@ -67,6 +67,7 @@ function initialiseBuffer() {
     var vertexData = [-0.5, -0.6, -0.5, 1.0, 0.0, 0.0, 1.0, // Front Face Tri 1
         0.5, 0.6, -0.5, 1.0, 0.0, 0.0, 1.0, // Front Face Tri 1
         -0.5, 0.6, -0.5, 1.0, 0.0, 0.0, 1.0, // Front Face Tri 1
+
         -0.5, -0.6, -0.5, 1.0, 0.0, 0.0, 1.0, // Front Face Tri 2
         0.5, -0.6, -0.5, 1.0, 0.0, 0.0, 1.0, // Front Face Tri 2
         0.5, 0.6, -0.5, 1.0, 0.0, 0.0, 1.0, // Front Face Tri 2
@@ -279,6 +280,7 @@ function renderScene() {
     */
     // postscript의 fill같은 느낌. 모양, starting point, 3의 배수의 개수
     gl.drawArrays(gl.TRIANGLES, 0, 12);
+    // gl.TRIANGLES_STRIP
 
     if (!testGLError("gl.drawArrays")) {
         return false;
