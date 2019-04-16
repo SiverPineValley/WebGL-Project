@@ -219,7 +219,6 @@ function renderScene() {
         The functions gl.clearDepth and gl.clearStencil allow an application to do the same with depth and stencil values respectively.
     */
     // 배경색을 지우고 바꿔라.
-    // gl.clearColor(0.6, 0.8, 1.0, 1.0);
     gl.clearColor(0.2, 0.2, 0.2, 0.1);
 
     /*
@@ -243,10 +242,10 @@ function renderScene() {
 
     // 회전
     rot_z += 0.01;
-    transformationMatrix[0] = Math.cos(rot_z);
     transformationMatrix[5] = Math.cos(rot_z);
-    transformationMatrix[10] = Math.sin(rot_z);
-    transformationMatrix[6] = -Math.sin(rot_z);
+    transformationMatrix[10] = Math.cos(rot_z);
+    transformationMatrix[6] = Math.sin(rot_z);
+    transformationMatrix[9] = -Math.sin(rot_z);
 
     // Pass the identity transformation matrix to the shader using its location
     gl.uniformMatrix4fv(matrixLocation, gl.FALSE, transformationMatrix);
