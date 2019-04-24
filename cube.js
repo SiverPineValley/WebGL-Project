@@ -64,20 +64,56 @@ function initialiseBuffer() {
     // 삼각형의 vertex를 의미한다. x, y, z (정규화된 좌표계)
     // x와 y는 -1부터 1까지의 값을 가진다.
     // y는 화면 위로 갈때 1, 화면 아래로 갈때 -1
-    var vertexData = [-0.5, -0.6, -0.5, 1.0, 0.0, 0.0, 1.0, // Front Face Tri 1
-        0.5, 0.6, -0.5, 1.0, 0.0, 0.0, 1.0, // Front Face Tri 1
-        -0.5, 0.6, -0.5, 1.0, 0.0, 0.0, 1.0, // Front Face Tri 1
+    var vertexData = [-0.5, -0.5, -0.5, 1.0, 0.0, 0.0, 1.0, // Front Face Tri 1
+        0.5, 0.5, -0.5, 1.0, 0.0, 0.0, 1.0, // Front Face Tri 1
+        -0.5, 0.5, -0.5, 1.0, 0.0, 0.0, 1.0, // Front Face Tri 1
 
-        -0.5, -0.6, -0.5, 1.0, 0.0, 0.0, 1.0, // Front Face Tri 2
-        0.5, -0.6, -0.5, 1.0, 0.0, 0.0, 1.0, // Front Face Tri 2
-        0.5, 0.6, -0.5, 1.0, 0.0, 0.0, 1.0, // Front Face Tri 2
+        -0.5, -0.5, -0.5, 1.0, 0.0, 0.0, 1.0, // Front Face Tri 2
+        0.5, -0.5, -0.5, 1.0, 0.0, 0.0, 1.0, // Front Face Tri 2
+        0.5, 0.5, -0.5, 1.0, 0.0, 0.0, 1.0, // Front Face Tri 2
+        // ----------------------------------------------------
+        -0.5, 0.5, 0.5, 0.0, 0.0, 1.0, 1.0, // Back Face Tri 1
+        0.5, 0.5, 0.5, 0.0, 0.0, 1.0, 1.0, // Back Face Tri 1
+        -0.5, -0.5, 0.5, 0.0, 0.0, 1.0, 1.0, // Back Face Tri 1
 
-        -0.5, 0.6, 0.5, 0.0, 0.0, 1.0, 1.0, // Back Face Tri 1
-        0.5, 0.6, 0.5, 0.0, 0.0, 1.0, 1.0, // Back Face Tri 1
-        -0.5, -0.6, 0.5, 0.0, 0.0, 1.0, 1.0, // Back Face Tri 1
-        0.5, 0.6, 0.5, 0.0, 0.0, 1.0, 1.0, // Back Face Tri 2
-        0.5, -0.6, 0.5, 0.0, 0.0, 1.0, 1.0, // Back Face Tri 2
-        -0.5, -0.6, 0.5, 0.0, 0.0, 1.0, 1.0, // Back Face Tri 2
+        0.5, 0.5, 0.5, 0.0, 0.0, 1.0, 1.0, // Back Face Tri 2
+        0.5, -0.5, 0.5, 0.0, 0.0, 1.0, 1.0, // Back Face Tri 2
+        -0.5, -0.5, 0.5, 0.0, 0.0, 1.0, 1.0, // Back Face Tri 2
+        // ----------------------------------------------------
+
+        -0.5, -0.5, -0.5, 0.0, 1.0, 0.0, 1.0, // Side1 Face Tri 1
+        -0.5, -0.5, 0.5, 0.0, 1.0, 0.0, 1.0, // Side1 Face Tri 1
+        0.5, -0.5, 0.5, 0.0, 1.0, 0.0, 1.0, // Side1 Face Tri 1
+
+        -0.5, -0.5, -0.5, 0.0, 1.0, 0.0, 1.0, // Side1 Face Tri 2
+        0.5, -0.5, 0.5, 0.0, 1.0, 0.0, 1.0, // Side1 Face Tri 2
+        0.5, -0.5, -0.5, 0.0, 1.0, 0.0, 1.0, // Side1 Face Tri 2
+        // ----------------------------------------------------
+
+        -0.5, 0.5, -0.5, 1.0, 1.0, 0.0, 1.0, // Side2 Face Tri 1
+        0.5, 0.5, -0.5, 1.0, 1.0, 0.0, 1.0, // Side2 Face Tri 1
+        0.5, 0.5, 0.5, 1.0, 1.0, 0.0, 1.0, // Side2 Face Tri 1
+
+        -0.5, 0.5, -0.5, 1.0, 1.0, 0.0, 1.0, // Side2 Face Tri 2
+        0.5, 0.5, 0.5, 1.0, 1.0, 0.0, 1.0, // Side2 Face Tri 2
+        -0.5, 0.5, 0.5, 1.0, 1.0, 0.0, 1.0, // Side2 Face Tri 2
+        // ----------------------------------------------------
+
+        -0.5, -0.5, -0.5, 0.0, 1.0, 1.0, 1.0, // Side3 Face Tri 1
+        -0.5, 0.5, 0.5, 0.0, 1.0, 1.0, 1.0, // Side3 Face Tri 1
+        -0.5, -0.5, 0.5, 0.0, 1.0, 1.0, 1.0, // Side3 Face Tri 1
+
+        -0.5, -0.5, -0.5, 0.0, 1.0, 1.0, 1.0, // Side3 Face Tri 2
+        -0.5, 0.5, -0.5, 0.0, 1.0, 1.0, 1.0, // Side3 Face Tri 2
+        -0.5, 0.5, 0.5, 0.0, 1.0, 1.0, 1.0, // Side3 Face Tri 2
+        // ----------------------------------------------------
+        0.5, 0.5, -0.5, 1.0, 0.0, 1.0, 1.0, // Side4 Face Tri 1
+        0.5, -0.5, 0.5, 1.0, 0.0, 1.0, 1.0, // Side4 Face Tri 1
+        0.5, 0.5, 0.5, 1.0, 0.0, 1.0, 1.0, // Side4 Face Tri 1
+
+        0.5, 0.5, -0.5, 1.0, 0.0, 1.0, 1.0, // Side4 Face Tri 2
+        0.5, -0.5, -0.5, 1.0, 0.0, 1.0, 1.0, // Side4 Face Tri 2
+        0.5, -0.5, 0.5, 1.0, 0.0, 1.0, 1.0, // Side4 Face Tri 2
     ];
 
     // Generate a buffer object
@@ -245,7 +281,7 @@ function renderScene() {
     rot_z += 0.01;
     transformationMatrix[5] = Math.cos(rot_z);
     transformationMatrix[10] = Math.cos(rot_z);
-    transformationMatrix[6] = Math.sin(rot_z);
+    transformationMatrix[6] = -Math.sin(rot_z);
     transformationMatrix[9] = -Math.sin(rot_z);
 
     // Pass the identity transformation matrix to the shader using its location
@@ -256,7 +292,6 @@ function renderScene() {
     }
 
     // 유저가 지정한 vertex array를 enable해준다.
-    // Set the vertex data to this attribute index, with the number of floats in each position
     // 총 2개의 attribute를 가지며, 각 attribute는 28바이트 떨어져있다. 그중 12바이트 떨어져있다.
     // 몇 번째의 attribute인지, attribute 개수, 플로팅포인트(4바이트), 28바이트 점프해야 다음 버텍스
     gl.enableVertexAttribArray(0);
@@ -279,7 +314,7 @@ function renderScene() {
         a version of gl.drawElements which allows a user to restrict the actuial indices accessed.
     */
     // postscript의 fill같은 느낌. 모양, starting point, 3의 배수의 개수
-    gl.drawArrays(gl.TRIANGLES, 0, 12);
+    gl.drawArrays(gl.TRIANGLES, 0, 36);
     // gl.TRIANGLES_STRIP
 
     if (!testGLError("gl.drawArrays")) {
