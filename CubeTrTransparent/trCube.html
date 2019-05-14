@@ -15,10 +15,14 @@
     <canvas id="helloapicanvas" style="border: none;" width="400" height="400"></canvas>
     <br>
     <button onclick="trXinc()">Translate X + 0.1</button>
-    <button onclick="trXdec()">Translate X - 0.1</button>
+    <button onclick="trXdec()">Translate X - 0.1</button><br>
+    <button onclick="trYinc()">Translate Y + 0.1</button>
+    <button onclick="trYdec()">Translate Y - 0.1</button><br>
+    <button onclick="trZinc()">Translate Z + 0.1</button>
+    <button onclick="trZdec()">Translate Z - 0.1</button><br>
     <button onclick="animRotate()">Animation Rotate + 0.01</button>
+    <button onclick="animReverseRotate()">Animation Reverse Rotate - 0.01</button><br>
     <button onclick="animPause()">Animation Pause</button>
-    <!-- <button onclick="clearRot()">Clear</button> -->
     <table border=1>
         <tr>
             <td id="matrix0">
@@ -41,7 +45,9 @@
                                                                                 <td id="matrix11">
                                                                                     <td id="matrix15">
     </table>
-    <p id="webTrX"> Test </p>
+    <p id="webTrX"> transX : 0.0000 </p>
+    <p id="webTrY"> transY : 0.0000 </p>
+    <p id="webTrZ"> transZ : 0.0000 </p>
 </body>
 
 </html>

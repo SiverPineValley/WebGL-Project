@@ -440,11 +440,17 @@ function rotateArbAxis(m, angle, axis) {
 rotValue = 0.0;
 animRotValue = 0.0;
 transX = 0.0;
+transY = 0.0;
+transZ = 0.0;
 frames = 1;
 
 // 돌아가는 속도
 function animRotate() {
     animRotValue += 0.01;
+}
+
+function animReverseRotate() {
+    animRotValue -= 0.01;
 }
 
 function animPause() {
@@ -461,27 +467,25 @@ function trXdec() {
     document.getElementById("webTrX").innerHTML = "transX : " + transX.toFixed(4);
 }
 
-// function clearRot() {
-//     animRotValue = 0.0;
-//     mov_matrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
-//     console.log(mov_matrix);
-//     document.getElementById("matrix0").innerHTML = mov_matrix[0].toFixed(4);
-//     document.getElementById("matrix1").innerHTML = mov_matrix[1].toFixed(4);
-//     document.getElementById("matrix2").innerHTML = mov_matrix[2].toFixed(4);
-//     document.getElementById("matrix3").innerHTML = mov_matrix[3].toFixed(4);
-//     document.getElementById("matrix4").innerHTML = mov_matrix[4].toFixed(4);
-//     document.getElementById("matrix5").innerHTML = mov_matrix[5].toFixed(4);
-//     document.getElementById("matrix6").innerHTML = mov_matrix[6].toFixed(4);
-//     document.getElementById("matrix7").innerHTML = mov_matrix[7].toFixed(4);
-//     document.getElementById("matrix8").innerHTML = mov_matrix[8].toFixed(4);
-//     document.getElementById("matrix9").innerHTML = mov_matrix[9].toFixed(4);
-//     document.getElementById("matrix10").innerHTML = mov_matrix[10].toFixed(4);
-//     document.getElementById("matrix11").innerHTML = mov_matrix[11].toFixed(4);
-//     document.getElementById("matrix12").innerHTML = mov_matrix[12].toFixed(4);
-//     document.getElementById("matrix13").innerHTML = mov_matrix[13].toFixed(4);
-//     document.getElementById("matrix14").innerHTML = mov_matrix[14].toFixed(4);
-//     document.getElementById("matrix15").innerHTML = mov_matrix[15].toFixed(4);
-// }
+function trYinc() {
+    transY += 0.01;
+    document.getElementById("webTrY").innerHTML = "transY : " + transY.toFixed(4);
+}
+
+function trYdec() {
+    transY -= 0.01;
+    document.getElementById("webTrY").innerHTML = "transY : " + transY.toFixed(4);
+}
+
+function trZinc() {
+    transZ += 0.01;
+    document.getElementById("webTrZ").innerHTML = "transZ : " + transZ.toFixed(4);
+}
+
+function trZdec() {
+    transZ -= 0.01;
+    document.getElementById("webTrZ").innerHTML = "transZ : " + transZ.toFixed(4);
+}
 
 // 화면에 그리는 명령
 function renderScene() {
@@ -501,7 +505,7 @@ function renderScene() {
     rotateArbAxis(mov_matrix, rotValue, rotAxis);
     // console.log("rotValue= ", rotValue);
     rotValue += animRotValue;
-    translate(mov_matrix, transX, 0.0, 0.0);
+    translate(mov_matrix, transX, transY, transZ);
 
     // MVP 매트릭스를 Uniform으로 보내줌
     gl.uniformMatrix4fv(locPmatrix, false, proj_matrix);
@@ -570,7 +574,7 @@ function renderScene() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     idMatrix(mov_matrix);
-    translate(mov_matrix, transX, 0.0, 0.0);
+    translate(mov_matrix, transX, transY, transZ);
     rotateArbAxis(mov_matrix, rotValue, rotAxis);
 
     gl.uniformMatrix4fv(locMmatrix, false, mov_matrix);
@@ -597,31 +601,31 @@ function renderScene() {
 
     // 작은 큐브 2
     mov_matrix = mov_matrix_child.slice();
-    drawSmallCube(mov_matrix, -0.7, -0.7, -0.7, 0.35, 3.0, 'y');
+    drawSmallCube(mov_matrix, -0.7, -0.7, -0.7, 0.25, 4.0, 'y');
 
     // 작은 큐브 3
     mov_matrix = mov_matrix_child.slice();
-    drawSmallCube(mov_matrix, 0.7, -0.7, -0.7, 0.4, 5.0, 'z');
+    drawSmallCube(mov_matrix, 0.7, -0.7, -0.7, 0.25, 5.0, 'z');
 
     // 작은 큐브 4
     mov_matrix = mov_matrix_child.slice();
-    drawSmallCube(mov_matrix, -0.7, 0.7, -0.7, 0.45, 6.0);
+    drawSmallCube(mov_matrix, -0.7, 0.7, -0.7, 0.25, 6.0);
 
     // 작은 큐브 5
     mov_matrix = mov_matrix_child.slice();
-    drawSmallCube(mov_matrix, -0.7, -0.7, 0.7, 0.5, 1.0, 'x');
+    drawSmallCube(mov_matrix, -0.7, -0.7, 0.7, 0.25, 7.0, 'x');
 
     // 작은 큐브 6
     mov_matrix = mov_matrix_child.slice();
-    drawSmallCube(mov_matrix, 0.7, 0.7, -0.7, 0.55, 2.0, 'y');
+    drawSmallCube(mov_matrix, 0.7, 0.7, -0.7, 0.25, 8.0, 'y');
 
     // 작은 큐브 7
     mov_matrix = mov_matrix_child.slice();
-    drawSmallCube(mov_matrix, -0.7, 0.7, 0.7, 0.1, 10.0, 'z');
+    drawSmallCube(mov_matrix, -0.7, 0.7, 0.7, 0.25, 9.0, 'z');
 
     // 작은 큐브 8
     mov_matrix = mov_matrix_child.slice();
-    drawSmallCube(mov_matrix, 0.7, -0.7, 0.7, 0.25, 3.0);
+    drawSmallCube(mov_matrix, 0.7, -0.7, 0.7, 0.25, 10.0);
 
     // gl.drawArrays(그리는 옵션, 시작점의 위치(음수 x), vertex의 개수 (삼각형 개수 * 3))
     /*
