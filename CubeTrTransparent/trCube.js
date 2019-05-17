@@ -443,6 +443,8 @@ transX = 0.0;
 transY = 0.0;
 transZ = 0.0;
 frames = 1;
+moonD = 0.0;
+revolve = 0;
 
 // 돌아가는 속도
 function animRotate() {
@@ -485,6 +487,21 @@ function trZinc() {
 function trZdec() {
     transZ -= 0.01;
     document.getElementById("webTrZ").innerHTML = "transZ : " + transZ.toFixed(4);
+}
+
+function moonFar() {
+    moonD += 0.1;
+    document.getElementById("moonD").innerHTML = "moonD : " + moonD.toFixed(4);
+}
+
+function moonClose() {
+    moonD -= 0.1;
+    document.getElementById("moonD").innerHTML = "moonD : " + moonD.toFixed(4);
+}
+
+function revolveTogle() {
+    if (revolve === 0) revolve = 1;
+    else revolve = 0;
 }
 
 // 화면에 그리는 명령
@@ -581,8 +598,10 @@ function renderScene() {
     gl.drawArrays(gl.TRIANGLES, 0, 36);
 
     function drawSmallCube(m, x, y, z, s, rs, rotCon) {
-        translate(m, x, y, z);
-        scale(m, s, s, s);
+        if (revolve === 0) {
+            translate(m, x, y, z);
+            scale(m, s, s, s);
+        }
         if (rotCon === 'x')
             rotateX(m, rotValue * rs);
         else if (rotCon === 'y')
@@ -591,41 +610,45 @@ function renderScene() {
             rotateZ(m, rotValue * rs);
         else
             rotateArbAxis(m, rotValue * rs, rotAxis);
+        if (revolve === 1) {
+            translate(m, x, y, z);
+            scale(m, s, s, s);
+        }
         gl.uniformMatrix4fv(locMmatrix, false, m);
         gl.drawArrays(gl.TRIANGLES, 0, 36);
     }
 
     // 작은 큐브 1
     var mov_matrix_child = mov_matrix.slice();
-    drawSmallCube(mov_matrix, 0.7, 0.7, 0.7, 0.25, 3.0, 'x');
+    drawSmallCube(mov_matrix, 0.7 + moonD, 0.7 + moonD, 0.7 + moonD, 0.25, 3.0, 'x');
 
     // 작은 큐브 2
     mov_matrix = mov_matrix_child.slice();
-    drawSmallCube(mov_matrix, -0.7, -0.7, -0.7, 0.25, 4.0, 'y');
+    drawSmallCube(mov_matrix, -0.7 - moonD, -0.7 - moonD, -0.7 - moonD, 0.25, 4.0, 'y');
 
     // 작은 큐브 3
     mov_matrix = mov_matrix_child.slice();
-    drawSmallCube(mov_matrix, 0.7, -0.7, -0.7, 0.25, 5.0, 'z');
+    drawSmallCube(mov_matrix, 0.7 + moonD, -0.7 - moonD, -0.7 - moonD, 0.25, 5.0, 'z');
 
     // 작은 큐브 4
     mov_matrix = mov_matrix_child.slice();
-    drawSmallCube(mov_matrix, -0.7, 0.7, -0.7, 0.25, 6.0);
+    drawSmallCube(mov_matrix, -0.7 - moonD, 0.7 + moonD, -0.7 - moonD, 0.25, 6.0);
 
     // 작은 큐브 5
     mov_matrix = mov_matrix_child.slice();
-    drawSmallCube(mov_matrix, -0.7, -0.7, 0.7, 0.25, 7.0, 'x');
+    drawSmallCube(mov_matrix, -0.7 - moonD, -0.7 - moonD, 0.7 + moonD, 0.25, 7.0, 'x');
 
     // 작은 큐브 6
     mov_matrix = mov_matrix_child.slice();
-    drawSmallCube(mov_matrix, 0.7, 0.7, -0.7, 0.25, 8.0, 'y');
+    drawSmallCube(mov_matrix, 0.7 + moonD, 0.7 + moonD, -0.7 - moonD, 0.25, 8.0, 'y');
 
     // 작은 큐브 7
     mov_matrix = mov_matrix_child.slice();
-    drawSmallCube(mov_matrix, -0.7, 0.7, 0.7, 0.25, 9.0, 'z');
+    drawSmallCube(mov_matrix, -0.7 - moonD, 0.7 + moonD, 0.7 + moonD, 0.25, 9.0, 'z');
 
     // 작은 큐브 8
     mov_matrix = mov_matrix_child.slice();
-    drawSmallCube(mov_matrix, 0.7, -0.7, 0.7, 0.25, 10.0);
+    drawSmallCube(mov_matrix, 0.7 + moonD, -0.7 - moonD, 0.7 + moonD, 0.25, 10.0);
 
     // gl.drawArrays(그리는 옵션, 시작점의 위치(음수 x), vertex의 개수 (삼각형 개수 * 3))
     /*
