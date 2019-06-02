@@ -30,7 +30,6 @@ function initialiseGL(canvas) {
 var shaderProgram;
 
 function initialiseBuffer() {
-
     // Create a texture.
     var texture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, texture);
@@ -47,76 +46,85 @@ function initialiseBuffer() {
         gl.generateMipmap(gl.TEXTURE_2D);
     });
 
-    var vertexData = [
-        // x, y,   z,   r,   g,   b,   a,   u,   v,   nx,  ny, nz (A는 투명도, Normal Vector는 같게)
-        -0.5, 0.5, 0.5, 0.86, 0.84, 0.91, 0.5, 0.0, 1.0, 0.0, 1.0, 0.0, //3
-        0.5, 0.5, 0.5, 0.86, 0.84, 0.91, 0.5, 1.0, 1.0, 0.0, 1.0, 0.0, //1
-        0.5, 0.5, -0.5, 0.86, 0.84, 0.91, 0.5, 1.0, 1.0, 0.0, 1.0, 0.0, //2
+    var vertexData = [-0.5, 0.5, 0.5, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0, //3
+        0.5, 0.5, 0.5, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, //1
+        0.5, 0.5, -0.5, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, //2
 
-        -0.5, 0.5, 0.5, 0.86, 0.84, 0.91, 0.5, 0.0, 1.0, 0.0, 1.0, 0.0, //3
-        0.5, 0.5, -0.5, 0.86, 0.84, 0.91, 0.5, 1.0, 1.0, 0.0, 1.0, 0.0, //2
-        -0.5, 0.5, -0.5, 0.86, 0.84, 0.91, 0.5, 0.0, 1.0, 0.0, 1.0, 0.0, //4
+        -0.5, 0.5, 0.5, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0, //3
+        0.5, 0.5, -0.5, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, //2
+        -0.5, 0.5, -0.5, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0, //4
+        //상
 
-        0.5, 0.5, -0.5, 0.01, 0.75, 0.24, 0.5, 1.0, 1.0, 0.0, 0.0, -1.0, //2
-        0.5, -0.5, -0.5, 0.01, 0.75, 0.24, 0.5, 1.0, 0.0, 0.0, 0.0, -1.0, //6
-        -0.5, -0.5, -0.5, 0.01, 0.75, 0.24, 0.5, 0.0, 0.0, 0.0, 0.0, -1.0, //8
+        -0.5, -0.5, -0.5, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, //8
+        0.5, -0.5, -0.5, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, //6
+        0.5, 0.5, -0.5, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, //2
 
-        -0.5, 0.5, -0.5, 0.01, 0.75, 0.24, 0.5, 0.0, 1.0, 0.0, 0.0, -1.0, //4
-        0.5, 0.5, -0.5, 0.01, 0.75, 0.24, 0.5, 1.0, 1.0, 0.0, 0.0, -1.0, //2
-        -0.5, -0.5, -0.5, 0.01, 0.75, 0.24, 0.5, 0.0, 0.0, 0.0, 0.0, -1.0, //8
+        -0.5, -0.5, -0.5, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, //8
+        0.5, 0.5, -0.5, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, //2
+        -0.5, 0.5, -0.5, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0, //4
+        //옆1
 
-        0.5, -0.5, 0.5, 1.0, 0.67, 0.67, 0.5, 0.0, 1.0, 1.0, 0.0, 0.0, //5
-        0.5, -0.5, -0.5, 1.0, 0.67, 0.67, 0.5, 0.0, 1.0, 1.0, 0.0, 0.0, //6
-        0.5, 0.5, -0.5, 1.0, 0.67, 0.67, 0.5, 1.0, 1.0, 1.0, 0.0, 0.0, //2
+        0.5, -0.5, 0.5, 1.0, 0.5, 0.0, 1.0, 0.0, 1.0, //5
+        0.5, -0.5, -0.5, 1.0, 0.5, 0.0, 1.0, 0.0, 1.0, //6
+        0.5, 0.5, -0.5, 1.0, 0.5, 0.0, 1.0, 1.0, 1.0, //2
 
-        0.5, -0.5, 0.5, 1.0, 0.67, 0.67, 0.5, 0.0, 1.0, 1.0, 0.0, 0.0, //5
-        0.5, 0.5, -0.5, 1.0, 0.67, 0.67, 0.5, 1.0, 1.0, 1.0, 0.0, 0.0, //2
-        0.5, 0.5, 0.5, 1.0, 0.67, 0.67, 0.5, 1.0, 1.0, 1.0, 0.0, 0.0, //1
+        0.5, -0.5, 0.5, 1.0, 0.5, 0.0, 1.0, 0.0, 1.0, //5
+        0.5, 0.5, -0.5, 1.0, 0.5, 0.0, 1.0, 1.0, 1.0, //2
+        0.5, 0.5, 0.5, 1.0, 0.5, 0.0, 1.0, 1.0, 1.0, //1
+        //옆2
 
-        -0.5, 0.5, -0.5, 0.22, 0.28, 0.45, 0.5, 0.0, 1.0, -1.0, 0.0, 0.0, //4
-        -0.5, -0.5, -0.5, 0.22, 0.28, 0.45, 0.5, 0.0, 0.0, -1.0, 0.0, 0.0, //8
-        -0.5, -0.5, 0.5, 0.22, 0.28, 0.45, 0.5, 0.0, 0.0, -1.0, 0.0, 0.0, //7
+        -0.5, -0.5, 0.5, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, //7
+        -0.5, -0.5, -0.5, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, //8
+        -0.5, 0.5, -0.5, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, //4
 
-        -0.5, 0.5, 0.5, 0.22, 0.28, 0.45, 0.5, 0.0, 1.0, -1.0, 0.0, 0.0, //3
-        -0.5, 0.5, -0.5, 0.22, 0.28, 0.45, 0.5, 0.0, 1.0, -1.0, 0.0, 0.0, //4
-        -0.5, -0.5, 0.5, 0.22, 0.28, 0.45, 0.5, 0.0, 0.0, -1.0, 0.0, 0.0, //7
+        -0.5, -0.5, 0.5, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, //7
+        -0.5, 0.5, -0.5, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, //4
+        -0.5, 0.5, 0.5, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, //3
+        //옆3
 
-        -0.5, -0.5, 0.5, 1.0, 0.84, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 1.0, //7
-        0.5, -0.5, 0.5, 1.0, 0.84, 0.0, 0.5, 1.0, 0.0, 0.0, 0.0, 1.0, //5
-        0.5, 0.5, 0.5, 1.0, 0.84, 0.0, 0.5, 1.0, 1.0, 0.0, 0.0, 1.0, //1
+        -0.5, -0.5, 0.5, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, //7
+        0.5, -0.5, 0.5, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0, //5
+        0.5, 0.5, 0.5, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, //1
 
-        -0.5, -0.5, 0.5, 1.0, 0.84, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 1.0, //7
-        0.5, 0.5, 0.5, 1.0, 0.84, 0.0, 0.5, 1.0, 1.0, 0.0, 0.0, 1.0, //1
-        -0.5, 0.5, 0.5, 1.0, 0.84, 0.0, 0.5, 0.0, 1.0, 0.0, 0.0, 1.0, //3
+        -0.5, -0.5, 0.5, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, //7
+        0.5, 0.5, 0.5, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, //1
+        -0.5, 0.5, 0.5, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, //3
+        //옆4		
 
-        0.5, -0.5, -0.5, 0.75, 1.0, 0.0, 0.5, 1.0, 0.0, 0.0, -1.0, 0.0, //6
-        0.5, -0.5, 0.5, 0.75, 1.0, 0.0, 0.5, 1.0, 0.0, 0.0, -1.0, 0.0, //5
-        -0.5, -0.5, 0.5, 0.75, 1.0, 0.0, 0.5, 0.0, 0.0, 0.0, -1.0, 0.0, //7
+        -0.5, -0.5, 0.5, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, //7
+        0.5, -0.5, 0.5, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, //5
+        0.5, -0.5, -0.5, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, //6
 
-        -0.5, -0.5, -0.5, 0.75, 1.0, 0.0, 0.5, 0.0, 0.0, 0.0, -1.0, 0.0, //8
-        0.5, -0.5, -0.5, 0.75, 1.0, 0.0, 0.5, 1.0, 0.0, 0.0, -1.0, 0.0, //6
-        -0.5, -0.5, 0.5, 0.75, 1.0, 0.0, 0.5, 0.0, 0.0, 0.0, -1.0, 0.0, //7
+        -0.5, -0.5, 0.5, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, //7
+        0.5, -0.5, -0.5, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, //6
+        -0.5, -0.5, -0.5, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, //8
+        //하
+
     ];
+
+
 
     // Generate a buffer object
     gl.vertexBuffer = gl.createBuffer();
+
     // Bind buffer as a vertex buffer so we can fill it with data
     gl.bindBuffer(gl.ARRAY_BUFFER, gl.vertexBuffer);
+
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexData), gl.STATIC_DRAW);
+
     return testGLError("initialiseBuffers");
 }
 
 function initialiseShaders() {
 
     var fragmentShaderSource = '\
-            varying mediump vec4 color; \
+			varying mediump vec4 color; \
 			varying mediump vec2 texCoord;\
 			uniform sampler2D sampler2d; \
 			void main(void) \
 			{ \
-                gl_FragColor = 0.5 * color + 0.5 * texture2D(sampler2d, texCoord); \
-            }';
-    // gl_FragColor = 1.0 * color;\
+				gl_FragColor = 0.5 * color + 0.5 * texture2D(sampler2d, texCoord); \
+			}';
 
     gl.fragShader = gl.createShader(gl.FRAGMENT_SHADER);
     gl.shaderSource(gl.fragShader, fragmentShaderSource);
@@ -126,43 +134,21 @@ function initialiseShaders() {
         return false;
     }
 
-    // Normal Vector 추가
     var vertexShaderSource = '\
 			attribute highp vec3 myVertex; \
 			attribute highp vec4 myColor; \
 			attribute highp vec2 myUV; \
-			attribute highp vec3 myNormal; \
 			uniform mediump mat4 Pmatrix; \
 			uniform mediump mat4 Vmatrix; \
 			uniform mediump mat4 Mmatrix; \
-			uniform mediump mat4 Nmatrix; \
 			varying mediump vec4 color; \
 			varying mediump vec2 texCoord;\
 			void main(void)  \
 			{ \
-				vec4 nN; \
-				vec4 v1, v2, v3, v4; \
-				vec3 v5; \
-				v1 = Mmatrix*vec4(myVertex, 1.0); \
-				v2 = Mmatrix*vec4(myVertex + myNormal, 1.0); \
-				v1.xyz = v1.xyz/v1.w; /* Normalize */ \
-				v2.xyz = v2.xyz/v1.w; \
-				v3 = v2 - v1; \
-				v5 = normalize(v3.xyz);\
 				gl_Position = Pmatrix*Vmatrix*Mmatrix*vec4(myVertex, 1.0);\
-				nN = Mmatrix *vec4(myNormal,1.0); \
-					/* \
-				if (gl_Position.w != 0.0) \
-					gl_Position.x /= gl_Position.w; \
-				gl_Position.x += 1.0; \
-				if (gl_Position.w != 1.0) \
-					gl_Position.x *= gl_Position.w; */ \
-				color = 0.2 * myColor + vec4(0.8,0.8,0.8,1.0) * 0.5 * (dot(v5, vec3(1,1,1)) + 1.0);\
-				color.a = 1.0;\
+				color = myColor;\
 				texCoord = myUV; \
 			}';
-    //	color = 0.5 * myColor;\
-    //	color.rgb += 0.7 * gl_Position.zzz / gl_Position.w;\
 
     gl.vertexShader = gl.createShader(gl.VERTEX_SHADER);
     gl.shaderSource(gl.vertexShader, vertexShaderSource);
@@ -182,7 +168,6 @@ function initialiseShaders() {
     gl.bindAttribLocation(gl.programObject, 0, "myVertex");
     gl.bindAttribLocation(gl.programObject, 1, "myColor");
     gl.bindAttribLocation(gl.programObject, 2, "myUV");
-    gl.bindAttribLocation(gl.programObject, 3, "myNormal");
 
     // Link the program
     gl.linkProgram(gl.programObject);
@@ -208,11 +193,11 @@ function get_projection(angle, a, zMin, zMax) {
     ];
 }
 
-var proj_matrix = get_projection(30, 1.0, 1, 8.0);
+var proj_matrix = get_projection(30, 1.0, 1, 5);
 var mov_matrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 var view_matrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 // translating z
-view_matrix[14] = view_matrix[14] - 4; //zoom
+view_matrix[14] = view_matrix[14] - 2; //zoom
 
 function idMatrix(m) {
     m[0] = 1;
@@ -233,7 +218,7 @@ function idMatrix(m) {
     m[15] = 1;
 }
 
-function mulStoreMatrix(r, m, k) {
+function mulMatrix(m, k) {
     m0 = m[0];
     m1 = m[1];
     m2 = m[2];
@@ -287,26 +272,22 @@ function mulStoreMatrix(r, m, k) {
     a11 = k10 * m11 + k11 * m15 + k8 * m3 + k9 * m7;
     a15 = k14 * m11 + k15 * m15 + k12 * m3 + k13 * m7;
 
-    r[0] = a0;
-    r[1] = a1;
-    r[2] = a2;
-    r[3] = a3;
-    r[4] = a4;
-    r[5] = a5;
-    r[6] = a6;
-    r[7] = a7;
-    r[8] = a8;
-    r[9] = a9;
-    r[10] = a10;
-    r[11] = a11;
-    r[12] = a12;
-    r[13] = a13;
-    r[14] = a14;
-    r[15] = a15;
-}
-
-function mulMatrix(m, k) {
-    mulStoreMatrix(m, m, k);
+    m[0] = a0;
+    m[1] = a1;
+    m[2] = a2;
+    m[3] = a3;
+    m[4] = a4;
+    m[5] = a5;
+    m[6] = a6;
+    m[7] = a7;
+    m[8] = a8;
+    m[9] = a9;
+    m[10] = a10;
+    m[11] = a11;
+    m[12] = a12;
+    m[13] = a13;
+    m[14] = a14;
+    m[15] = a15;
 }
 
 function translate(m, tx, ty, tz) {
@@ -317,117 +298,60 @@ function translate(m, tx, ty, tz) {
     mulMatrix(m, tm);
 }
 
-
-function rotateX(m, angle) {
-    var rm = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+function rotateZ(m, angle) {
     var c = Math.cos(angle);
     var s = Math.sin(angle);
+    var mv0 = m[0],
+        mv4 = m[4],
+        mv8 = m[8];
 
-    rm[5] = c;
-    rm[6] = s;
-    rm[9] = -s;
-    rm[10] = c;
-    mulMatrix(m, rm);
+    m[0] = c * m[0] - s * m[1];
+    m[4] = c * m[4] - s * m[5];
+    m[8] = c * m[8] - s * m[9];
+    m[1] = c * m[1] + s * mv0;
+    m[5] = c * m[5] + s * mv4;
+    m[9] = c * m[9] + s * mv8;
+}
+
+function rotateX(m, angle) {
+    var c = Math.cos(angle);
+    var s = Math.sin(angle);
+    var mv1 = m[1],
+        mv5 = m[5],
+        mv9 = m[9];
+
+    m[1] = m[1] * c - m[2] * s;
+    m[5] = m[5] * c - m[6] * s;
+    m[9] = m[9] * c - m[10] * s;
+
+    m[2] = m[2] * c + mv1 * s;
+    m[6] = m[6] * c + mv5 * s;
+    m[10] = m[10] * c + mv9 * s;
 }
 
 function rotateY(m, angle) {
-    var rm = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
     var c = Math.cos(angle);
     var s = Math.sin(angle);
+    var mv0 = m[0],
+        mv4 = m[4],
+        mv8 = m[8];
 
-    rm[0] = c;
-    rm[2] = -s;
-    rm[8] = s;
-    rm[10] = c;
-    mulMatrix(m, rm);
-}
+    m[0] = c * m[0] + s * m[2];
+    m[4] = c * m[4] + s * m[6];
+    m[8] = c * m[8] + s * m[10];
 
-function rotateZ(m, angle) {
-    var rm = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
-    var c = Math.cos(angle);
-    var s = Math.sin(angle);
-
-    rm[0] = c;
-    rm[1] = s;
-    rm[4] = -s;
-    rm[5] = c;
-    mulMatrix(m, rm);
-}
-
-function scale(m, sx, sy, sz) {
-    var rm = [sx, 0, 0, 0, 0, sy, 0, 0, 0, 0, sz, 0, 0, 0, 0, 1];
-    mulMatrix(m, rm);
-}
-
-function normalizeVec3(v) {
-    sq = v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
-    sq = Math.sqrt(sq);
-    if (sq < 0.000001) // Too Small
-        return -1;
-    v[0] /= sq;
-    v[1] /= sq;
-    v[2] /= sq;
-}
-
-function rotateArbAxis(m, angle, axis) {
-    var axis_rot = [0, 0, 0];
-    var ux, uy, uz;
-    var rm = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
-    var c = Math.cos(angle);
-    var c1 = 1.0 - c;
-    var s = Math.sin(angle);
-    axis_rot[0] = axis[0];
-    axis_rot[1] = axis[1];
-    axis_rot[2] = axis[2];
-    if (normalizeVec3(axis_rot) == -1)
-        return -1;
-    ux = axis_rot[0];
-    uy = axis_rot[1];
-    uz = axis_rot[2];
-    console.log("Log", angle);
-    rm[0] = c + ux * ux * c1;
-    rm[1] = uy * ux * c1 + uz * s;
-    rm[2] = uz * ux * c1 - uy * s;
-    rm[3] = 0;
-
-    rm[4] = ux * uy * c1 - uz * s;
-    rm[5] = c + uy * uy * c1;
-    rm[6] = uz * uy * c1 + ux * s;
-    rm[7] = 0;
-
-    rm[8] = ux * uz * c1 + uy * s;
-    rm[9] = uy * uz * c1 - ux * s;
-    rm[10] = c + uz * uz * c1;
-    rm[11] = 0;
-
-    rm[12] = 0;
-    rm[13] = 0;
-    rm[14] = 0;
-    rm[15] = 1;
-
-    mulMatrix(m, rm);
+    m[2] = c * m[2] - s * mv0;
+    m[6] = c * m[6] - s * mv4;
+    m[10] = c * m[10] - s * mv8;
 }
 
 rotValue = 0.0;
-rotValueSmall = 0.0;
-incRotValue = 0.0;
-incRotValueSmall = 0.02;
-
+animRotValue = 0.0;
 transX = 0.0;
 frames = 1;
-tempRotValue = 0.0;
-
-function stopRotate() {
-    if (incRotValue == 0.0) {
-        incRotValue = tempRotValue;
-    } else {
-        tempRotValue = incRotValue;
-        incRotValue = 0.0;
-    }
-}
 
 function animRotate() {
-    incRotValue += 0.01;
+    animRotValue += 0.01;
 }
 
 function trXinc() {
@@ -439,18 +363,17 @@ function renderScene() {
 
     //console.log("Frame "+frames+"\n");
     frames += 1;
-    rotAxis = [1, 1, 0];
 
     var Pmatrix = gl.getUniformLocation(gl.programObject, "Pmatrix");
     var Vmatrix = gl.getUniformLocation(gl.programObject, "Vmatrix");
     var Mmatrix = gl.getUniformLocation(gl.programObject, "Mmatrix");
-    var Nmatrix = gl.getUniformLocation(gl.programObject, "Nmatrix");
 
     idMatrix(mov_matrix);
-    rotateArbAxis(mov_matrix, rotValue, rotAxis);
-    rotValue += incRotValue;
-    rotValueSmall += incRotValueSmall;
+    rotateZ(mov_matrix, rotValue);
+    rotateX(mov_matrix, rotValue);
+    rotValue += animRotValue;
     translate(mov_matrix, transX, 0.0, 0.0);
+    //transX += 0.01; 
 
     gl.uniformMatrix4fv(Pmatrix, false, proj_matrix);
     gl.uniformMatrix4fv(Vmatrix, false, view_matrix);
@@ -461,13 +384,11 @@ function renderScene() {
     }
 
     gl.enableVertexAttribArray(0);
-    gl.vertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, 48, 0); // x, y, z
+    gl.vertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, 36, 0);
     gl.enableVertexAttribArray(1);
-    gl.vertexAttribPointer(1, 4, gl.FLOAT, gl.FALSE, 48, 12); // r, g, b
+    gl.vertexAttribPointer(1, 4, gl.FLOAT, gl.FALSE, 36, 12);
     gl.enableVertexAttribArray(2);
-    gl.vertexAttribPointer(2, 2, gl.FLOAT, gl.FALSE, 48, 28); // u, v
-    gl.enableVertexAttribArray(3);
-    gl.vertexAttribPointer(3, 3, gl.FLOAT, gl.FALSE, 48, 36); // nx, ny, nz
+    gl.vertexAttribPointer(2, 2, gl.FLOAT, gl.FALSE, 36, 28);
 
 
     if (!testGLError("gl.vertexAttribPointer")) {
@@ -475,31 +396,12 @@ function renderScene() {
     }
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LEQUAL);
-    // gl.enable(gl.CULL_FACE);
-    gl.enable(gl.BLEND);
-    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-    gl.blendEquation(gl.FUNC_ADD);
 
     gl.clearColor(0.6, 0.8, 1.0, 1.0);
     gl.clearDepth(1.0);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     gl.drawArrays(gl.TRIANGLES, 0, 36);
-
-    var mov_matrix2 = mov_matrix.slice();
-    translate(mov_matrix2, 0.75, 0.75, 0.75);
-    rotateY(mov_matrix2, rotValueSmall);
-    scale(mov_matrix2, 0.25, 0.25, 0.25);
-    gl.uniformMatrix4fv(Mmatrix, false, mov_matrix2);
-    gl.drawArrays(gl.TRIANGLES, 0, 36);
-
-    var mov_matrix3 = mov_matrix2.slice();
-    translate(mov_matrix3, 0.75, -0.75, 0.75);
-    rotateY(mov_matrix3, rotValueSmall);
-    scale(mov_matrix3, 0.25, 0.25, 0.25);
-    gl.uniformMatrix4fv(Mmatrix, false, mov_matrix3);
-    gl.drawArrays(gl.TRIANGLES, 0, 36);
-
     document.getElementById("matrix0").innerHTML = mov_matrix[0].toFixed(4);
     document.getElementById("matrix1").innerHTML = mov_matrix[1].toFixed(4);
     document.getElementById("matrix2").innerHTML = mov_matrix[2].toFixed(4);
@@ -546,7 +448,7 @@ function main() {
             //	|| window.mozRequestAnimationFrame || 
             return function(callback) {
                 // console.log("Callback is"+callback); 
-                window.setTimeout(callback, 10, 10);
+                window.setTimeout(callback, 100, 10);
             };
         })();
 
