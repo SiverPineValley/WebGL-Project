@@ -58,7 +58,8 @@ function initialiseBuffer() {
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
         gl.generateMipmap(gl.TEXTURE_2D);
     });
-
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     // 삼각형의 vertex를 의미한다. x, y, z (정규화된 좌표계)
     // x와 y는 -1부터 1까지의 값을 가진다.
     // y는 화면 위로 갈때 1, 화면 아래로 갈때 -1
@@ -95,13 +96,14 @@ function initialiseBuffer() {
         -0.5, 0.5, -0.5, 1.0, 0.0, 0.0, 0.5, 0.0, 1.0, //4
         -0.5, -0.5, 0.5, 1.0, 0.0, 0.0, 0.5, 0.0, 0.0, //7
 
-        -0.5, -0.5, 0.5, 0.0, 0.0, 1.0, 0.5, 0.0, 0.0, //7
-        0.5, -0.5, 0.5, 0.0, 0.0, 1.0, 0.5, 1.0, 0.0, //5
-        0.5, 0.5, 0.5, 0.0, 0.0, 1.0, 0.5, 1.0, 1.0, //1
+        // 앞면
+        -0.5, -0.5, 0.5, 0.0, 0.0, 1.0, 0.5, 2.0, 2.0, //7
+        0.5, -0.5, 0.5, 0.0, 0.0, 1.0, 0.5, -1.0, 2.0, //5
+        0.5, 0.5, 0.5, 0.0, 0.0, 1.0, 0.5, -1.0, -1.0, //1
 
-        -0.5, -0.5, 0.5, 0.0, 0.0, 1.0, 0.5, 0.0, 0.0, //7
-        0.5, 0.5, 0.5, 0.0, 0.0, 1.0, 0.5, 1.0, 1.0, //1
-        -0.5, 0.5, 0.5, 0.0, 0.0, 1.0, 0.5, 0.0, 1.0, //3
+        -0.5, -0.5, 0.5, 0.0, 0.0, 1.0, 0.5, 2.0, 2.0, //7
+        0.5, 0.5, 0.5, 0.0, 0.0, 1.0, 0.5, -1.0, -1.0, //1
+        -0.5, 0.5, 0.5, 0.0, 0.0, 1.0, 0.5, 2.0, -1.0, //3
 
         0.5, -0.5, -0.5, 0.0, 1.0, 0.0, 0.5, 1.0, 0.0, //6
         0.5, -0.5, 0.5, 0.0, 1.0, 0.0, 0.5, 1.0, 0.0, //5
@@ -136,8 +138,10 @@ function initialiseShaders() {
 			varying mediump vec2 texCoord;\
 			uniform sampler2D sampler2d; \
 			void main(void) \
-			{ \
-                gl_FragColor = 0.5 * color + 0.5 * texture2D(sampler2d, texCoord); \
+            { \
+                /* Color Collection */\
+                gl_FragColor = texture2D(sampler2d, texCoord) * texture2D(sampler2d, texCoord); \
+                gl_FragColor.a = 1.0; \
 			}';
 
     // fragment shader object 생성.
